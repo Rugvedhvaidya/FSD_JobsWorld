@@ -49,7 +49,6 @@ const resume = require("./routes/resume");
 const user = require("./routes/users");
 
 database();
-require("./config/redis")
 
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -64,3 +63,5 @@ const port_server = 5000 || process.env.PORT_SERVER;
 const server = app.listen(port_server, (req, res) => {
   console.log(`Server started on ${port_server}!!!`);
 });
+
+module.exports = app
