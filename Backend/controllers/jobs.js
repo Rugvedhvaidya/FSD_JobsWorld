@@ -1,7 +1,6 @@
 const Job = require("../models/jobs");
 const JobPosting = require("../models/jobPostings");
 const JobsApplied = require("../models/jobsApplied");
-const client = require("../config/redis.js");
 
 // This controller is called when the user requests for all jobs in the database
 exports.getAllJobs = async (req, res) => {
@@ -22,22 +21,7 @@ exports.getAllJobs = async (req, res) => {
     salary = 0;
   }
   let jobs;
-  let allJobs = `alljobs ${company_location} ${job_title} ${salary} ${job_type} ${skills} ${education_level} ${company_name} ${sort}`
-
-  try {
-    const cacheData = await client.get(allJobs, async (err, jobs) => {
-      if (err) {
-        console.log(err)
-        throw err
-      }
-      return jobs
-    })
-    if (cacheData !== null) {
-      res.status(200).json({
-        success: true,
-        jobs: JSON.parse(cacheData),
-      });
-    } else {
+  
       if (sort) {
         try {
           jobs = await Job.find({
@@ -71,7 +55,6 @@ exports.getAllJobs = async (req, res) => {
           }).sort({
             salary: `${sort}`
           });
-          await client.setEx(allJobs, 300, JSON.stringify(jobs));
           res.status(200).json({
             success: true,
             jobs,
@@ -113,7 +96,6 @@ exports.getAllJobs = async (req, res) => {
               $options: "i"
             },
           });
-          await client.setEx(allJobs, 300, JSON.stringify(jobs));
           res.status(200).json({
             success: true,
             jobs,
@@ -125,10 +107,6 @@ exports.getAllJobs = async (req, res) => {
           });
         }
       }
-    }
-  } catch (error) {
-    console.log(error)
-  }
 };
 
 // This controller is called when the user requests for details of one job in the database
